@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dear Alana</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐞</text></svg>">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(170deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem 1.5rem;
+    color: white;
+  }
+
+  #constellation {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .graph-edge {
+    stroke: rgba(255,224,130,0.13);
+    stroke-width: 0.8;
+    animation: edgeFade 1s ease both;
+  }
+  .graph-node {
+    fill: #FFE082;
+    animation: twinkle 2.5s ease-in-out infinite;
+    filter: url(#glow);
+  }
+
+  .heart-float {
+    position: absolute;
+    font-size: 14px;
+    color: #EF9A9A;
+    opacity: 0;
+    animation: floatUp 4.5s ease-in infinite;
+    pointer-events: none;
+  }
+
+  .moon {
+    position: absolute;
+    top: 6%;
+    right: 9%;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #FFF9C4, #FFE082);
+    box-shadow: 0 0 40px 15px rgba(255,248,225,0.12);
+    animation: gentlePulse 6s ease-in-out infinite;
+  }
+
+  .ladybird-wrap {
+    animation: bob 3s ease-in-out infinite;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));
+  }
+  .spot { animation: spotIn 0.5s ease both; }
+
+  .subtitle {
+    font-size: 1rem;
+    color: #B39DDB;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 400;
+    animation: slideUp 1s ease both;
+  }
+  .name {
+    font-size: 3rem;
+    font-weight: 600;
+    color: #F8BBD0;
+    text-shadow: 0 0 30px rgba(248,187,208,0.25);
+    line-height: 1.1;
+    margin-top: 0.15rem;
+    animation: slideUp 1s ease 0.15s both;
+  }
+
+  .controls-label {
+    color: rgba(255,255,255,0.35);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+  }
+  .p-display {
+    color: #CE93D8;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    min-width: 80px;
+  }
+  input[type=range] {
+    width: 120px;
+    accent-color: #CE93D8;
+    cursor: pointer;
+  }
+  .btn-resample {
+    background: rgba(206,147,216,0.15);
+    border: 1px solid rgba(206,147,216,0.3);
+    color: #CE93D8;
+    border-radius: 8px;
+    padding: 5px 14px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: background 0.2s;
+  }
+  .btn-resample:hover { background: rgba(206,147,216,0.25); }
+
+  .message {
+    text-align: center;
+    line-height: 1.75;
+    animation: slideUp 0.8s ease 0.8s both;
+  }
+  .message .main {
+    color: rgba(255,255,255,0.75);
+    font-size: 1.15rem;
+    font-style: italic;
+  }
+  .message .highlight {
+    color: #F8BBD0;
+    font-size: 1.3rem;
+    font-style: normal;
+    font-weight: 600;
+  }
+  .message .from {
+    color: rgba(255,255,255,0.35);
+    font-size: 0.88rem;
+    margin-top: 0.9rem;
+    font-style: normal;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes spotIn {
+    from { opacity: 0; transform: scale(0); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+  }
+  @keyframes edgeFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translateY(0); }
+    20% { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(-55px); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes gentlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+</style>
+</head>
+<body>
+
+<svg id="constellation">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+</svg>
+
+<div class="heart-float" style="left:22%;top:52%;animation-delay:1.2s">♥</div>
+<div class="heart-float" style="left:74%;top:48%;animation-delay:3s">♥</div>
+<div class="heart-float" style="left:48%;top:62%;animation-delay:5s">♥</div>
+
+<div class="moon"></div>
+
+<!-- Title -->
+<div style="text-align:center;margin-bottom:0.6rem">
+  <div class="subtitle">goodnight</div>
+  <div class="name">Alana</div>
+</div>
+
+<!-- Ladybird -->
+<div style="display:flex;flex-direction:column;align-items:center;margin:0.6rem 0;animation:slideUp 1s ease 0.3s both">
+  <div class="ladybird-wrap">
+    <svg id="ladybird" viewBox="0 0 100 110" width="130" height="143">
+      <ellipse cx="50" cy="58" rx="30" ry="35" fill="#E53935" />
+      <line x1="50" y1="24" x2="50" y2="92" stroke="#222" stroke-width="1.5" />
+      <g id="spots"></g>
+      <circle cx="50" cy="24" r="14" fill="#222" />
+      <circle cx="44" cy="20" r="3.5" fill="white" />
+      <circle cx="56" cy="20" r="3.5" fill="white" />
+      <circle cx="45" cy="19.5" r="1.8" fill="#222" />
+      <circle cx="57" cy="19.5" r="1.8" fill="#222" />
+      <circle cx="46" cy="18.5" r="0.8" fill="white" />
+      <circle cx="58" cy="18.5" r="0.8" fill="white" />
+      <path d="M44 12 Q40 2 34 0" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M56 12 Q60 2 66 0" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round" />
+      <circle cx="34" cy="0" r="2.5" fill="#222" />
+      <circle cx="66" cy="0" r="2.5" fill="#222" />
+      <path d="M45 26 Q50 31 55 26" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round" />
+      <path d="M22 45 L14 38" stroke="#222" stroke-width="2" stroke-linecap="round" />
+      <path d="M78 45 L86 38" stroke="#222" stroke-width="2" stroke-linecap="round" />
+      <path d="M20 60 L11 58" stroke="#222" stroke-width="2" stroke-linecap="round" />
+      <path d="M80 60 L89 58" stroke="#222" stroke-width="2" stroke-linecap="round" />
+      <path d="M23 75 L16 80" stroke="#222" stroke-width="2" stroke-linecap="round" />
+      <path d="M77 75 L84 80" stroke="#222" stroke-width="2" stroke-linecap="round" />
+    </svg>
+  </div>
+</div>
+
+<!-- Message -->
+<div class="message" style="margin-top:0.8rem;">
+  <div class="main">
+    sweet dreams tonight,<br/>
+    <span class="highlight">I hope this brings you good luck</span><br/>
+    tonight, tomorrow, and always
+  </div>
+  <div class="from">Yours, Daniel :)</div>
+</div>
+
+<!-- Controls -->
+<div style="margin-top:1.8rem;text-align:center;animation:slideUp 0.6s ease 1.2s both">
+  <div class="controls-label" style="margin-bottom:8px">the spots & star connections appear randomly — have a play ↓</div>
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap">
+    <span class="p-display" id="p-label">chance: 70%</span>
+    <input type="range" id="p-slider" min="0" max="100" step="5" value="70" />
+    <button class="btn-resample" id="btn-resample">shuffle ✦</button>
+  </div>
+</div>
+
+<script>
+// ── Ladybird spots ──
+// Spots stay on the red wing area only (below the head).
+// Head: circle cx=50 cy=24 r=14. Body: ellipse cx=50 cy=58 rx=30 ry=35.
+// So spots live roughly in cy=[42..88], within the ellipse.
+const SPOTS = [
+  { cx: 35, cy: 44, r: 5.5 },
+  { cx: 65, cy: 44, r: 5.5 },
+  { cx: 30, cy: 55, r: 5 },
+  { cx: 70, cy: 55, r: 5 },
+  { cx: 42, cy: 58, r: 4.5 },
+  { cx: 58, cy: 58, r: 4.5 },
+  { cx: 35, cy: 70, r: 4 },
+  { cx: 65, cy: 70, r: 4 },
+  { cx: 45, cy: 78, r: 3.5 },
+  { cx: 55, cy: 78, r: 3.5 },
+  { cx: 50, cy: 48, r: 3 },
+];
+
+function generateSpots(p) {
+  const g = document.getElementById('spots');
+  g.innerHTML = '';
+  SPOTS.forEach((s, i) => {
+    if (Math.random() < p) {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', s.cx);
+      c.setAttribute('cy', s.cy);
+      c.setAttribute('r', s.r);
+      c.setAttribute('fill', '#222');
+      c.classList.add('spot');
+      c.style.animationDelay = (0.07 * i) + 's';
+      c.style.transformOrigin = s.cx + 'px ' + s.cy + 'px';
+      g.appendChild(c);
+    }
+  });
+}
+
+// ── Random graph constellation G(n, p) ──
+// Stars = vertices. Each pair connected independently with probability p.
+const STAR_POSITIONS = [];
+const NUM_STARS = 25;
+
+function initStars() {
+  STAR_POSITIONS.length = 0;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const cx = w / 2, cy = h / 2;
+  let attempts = 0;
+  while (STAR_POSITIONS.length < NUM_STARS && attempts < 600) {
+    attempts++;
+    const x = 15 + Math.random() * (w - 30);
+    const y = 10 + Math.random() * (h - 20);
+    const dx = x - cx, dy = y - cy;
+    if (Math.sqrt(dx * dx + dy * dy) < Math.min(w, h) * 0.18) continue;
+    let tooClose = false;
+    for (const s of STAR_POSITIONS) {
+      if (Math.sqrt((x - s.x) ** 2 + (y - s.y) ** 2) < 38) { tooClose = true; break; }
+    }
+    if (tooClose) continue;
+    STAR_POSITIONS.push({
+      x, y,
+      r: 1 + Math.random() * 2.5,
+      delay: Math.random() * 3
+    });
+  }
+}
+
+function generateConstellation(p) {
+  const svg = document.getElementById('constellation');
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+
+  svg.querySelectorAll('.graph-edge, .graph-node').forEach(el => el.remove());
+
+  const n = STAR_POSITIONS.length;
+  const maxDist = Math.min(w, h) * 0.33;
+  let edgeIdx = 0;
+
+  // Edges — the actual G(n, p) bit
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const a = STAR_POSITIONS[i], b = STAR_POSITIONS[j];
+      const dist = Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+      if (dist > maxDist) continue;
+      if (Math.random() < p) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', a.x);
+        line.setAttribute('y1', a.y);
+        line.setAttribute('x2', b.x);
+        line.setAttribute('y2', b.y);
+        line.classList.add('graph-edge');
+        line.style.animationDelay = (edgeIdx * 0.025) + 's';
+        svg.appendChild(line);
+        edgeIdx++;
+      }
+    }
+  }
+
+  // Nodes — varied sizes and brightness
+  STAR_POSITIONS.forEach(s => {
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', s.x);
+    c.setAttribute('cy', s.y);
+    c.setAttribute('r', s.r);
+    c.classList.add('graph-node');
+    c.style.animationDelay = s.delay + 's';
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    svg.appendChild(c);
+  });
+}
+
+// ── Controls ──
+const slider = document.getElementById('p-slider');
+const label = document.getElementById('p-label');
+const btn = document.getElementById('btn-resample');
+
+function getP() { return parseInt(slider.value) / 100; }
+
+function refresh(newStars) {
+  const pVal = getP();
+  label.textContent = 'chance: ' + Math.round(pVal * 100) + '%';
+  generateSpots(pVal);
+  if (newStars) initStars();
+  generateConstellation(pVal);
+}
+
+slider.addEventListener('input', () => refresh(false));
+btn.addEventListener('click', () => refresh(true));
+
+initStars();
+generateSpots(0.7);
+generateConstellation(0.7);
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { initStars(); refresh(false); }, 250);
+});
+</script>
+</body>
+</html>
